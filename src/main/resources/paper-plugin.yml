@@ -1,0 +1,9 @@
+name: ChestShop
+version: '1.0'
+main: me.yourname.chestshop.ChestShopPlugin
+api-version: '1.21'
+author: YourName
+commands:
+  createshop:
+    description: "Перетворює скриню на магазин"
+    permission: "chestshop.create"
