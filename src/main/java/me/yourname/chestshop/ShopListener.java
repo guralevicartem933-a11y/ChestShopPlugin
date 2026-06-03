@@ -2,6 +2,7 @@ package me.yourname.chestshop;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -55,8 +56,10 @@ public class ShopListener implements Listener {
         Inventory gui = Bukkit.createInventory(null, 27, Component.text("Налаштування магазину"));
         ItemStack placeholder = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = placeholder.getItemMeta();
-        meta.displayName(Component.text(" "));
-        placeholder.setItemMeta(meta);
+        if (meta != null) {
+            meta.displayName(Component.text(" "));
+            placeholder.setItemMeta(meta);
+        }
         
         for (int i = 0; i < 27; i++) gui.setItem(i, placeholder);
 
@@ -65,8 +68,10 @@ public class ShopListener implements Listener {
         
         ItemStack confirmButton = new ItemStack(Material.GREEN_WOOL);
         ItemMeta confirmMeta = confirmButton.getItemMeta();
-        confirmMeta.displayName(Component.text("ЗБЕРЕГТИ НАЛАШТУВАННЯ", NamedTextColor.GREEN));
-        confirmButton.setItemMeta(confirmMeta);
+        if (confirmMeta != null) {
+            confirmMeta.displayName(Component.text("ЗБЕРЕГТИ НАЛАШТУВАННЯ", NamedTextColor.GREEN));
+            confirmButton.setItemMeta(confirmMeta);
+        }
         gui.setItem(22, confirmButton);
 
         settingUpShops.put(player.getUniqueId(), shop);
@@ -78,22 +83,24 @@ public class ShopListener implements Listener {
         ItemStack product = shop.getProduct().clone();
         ItemMeta productMeta = product.getItemMeta();
         
-        List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("----------------", NamedTextColor.GRAY));
-        lore.add(Component.text("Ціна: ", NamedTextColor.YELLOW)
-                .append(Component.text(shop.getPriceItem().getAmount() + "x ", NamedTextColor.WHITE))
-                .append(Component.text(shop.getPriceItem().getType().name(), NamedTextColor.AQUA)));
-        
-        if (isOwner) {
-            lore.add(Component.text("ПКМ: Змінити ціну/товар", NamedTextColor.GOLD));
-        } else {
-            lore.add(Component.text("Клікніть, щоб КУПИТИ", NamedTextColor.GREEN));
+        if (productMeta != null) {
+            List<Component> lore = new ArrayList<>();
+            lore.add(Component.text("----------------", NamedTextColor.GRAY));
+            lore.add(Component.text("Ціна: ", NamedTextColor.YELLOW)
+                    .append(Component.text(shop.getPriceItem().getAmount() + "x ", NamedTextColor.WHITE))
+                    .append(Component.text(shop.getPriceItem().getType().name(), NamedTextColor.AQUA)));
+            
+            if (isOwner) {
+                lore.add(Component.text("ПКМ: Змінити ціну/товар", NamedTextColor.GOLD));
+            } else {
+                lore.add(Component.text("Клікніть, щоб КУПИТИ", NamedTextColor.GREEN));
+            }
+            
+            productMeta.lore(lore);
+            product.setItemMeta(productMeta);
         }
         
-        productMeta.lore(lore);
-        product.setItemMeta(productMeta);
         gui.setItem(13, product);
-        
         settingUpShops.put(player.getUniqueId(), shop);
         player.openInventory(gui);
     }
@@ -171,7 +178,8 @@ public class ShopListener implements Listener {
         if (session == null) return;
 
         event.setCancelled(true);
-        String text = plugin.getServer().getItemFactory().getComponentSerializer().serialize(event.originalMessage()).toLowerCase().trim();
+        
+        String text = PlainTextComponentSerializer.plainText().serialize(event.message()).toLowerCase().trim();
 
         if (text.contains("так")) {
             Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("ChestShop"), () -> {
@@ -218,4 +226,4 @@ public class ShopListener implements Listener {
         public PurchaseSession(ShopData shop) { this.shop = shop; }
         public ShopData getShop() { return shop; }
     }
-                                              }
+}
